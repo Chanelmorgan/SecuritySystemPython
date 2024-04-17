@@ -11,10 +11,11 @@ body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fullbo
 detection = True
 detection_stopped_time = None
 timer_started = False
+SECONDS_TO_RECORD_AFTER_DETECTION = 5
 
 frame_size = (int(cap.get(3)), int(cap.get(4)))  # Corrected syntax
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # Corrected function name
-out = cv2.VideoWriter("video.mp4", fourcc, 20, frame_size)
+
 
 while True:
     _, frame = cap.read()
@@ -26,8 +27,24 @@ while True:
 
     # Only start recording once a body or face detected
     if len(faces) + len(bodies) > 0:
-        detection = True
-
+        if detection:
+            timer_started = False
+        else:
+            detection = True
+            current_time = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+            out = cv2.VideoWriter(f"{current_time}.mp4", fourcc, 20, frame_size)
+            print("Started Recording!")
+    elif detection:
+        if timer_started:
+            if time.time() - detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION:
+                detection = False
+                timer_started = False
+                # Saves the recording
+                out.release()
+                print("Stop Recording!")
+            else:
+                timer_started = True
+                detection_stopped_time = time.time()
     out.write(frame)
 
     # Drawing rectangles on the frame
