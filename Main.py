@@ -8,13 +8,13 @@ cap = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fullbody.xml")
 
-
-recording = True
+detection = True
+detection_stopped_time = None
+timer_started = False
 
 frame_size = (int(cap.get(3)), int(cap.get(4)))  # Corrected syntax
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # Corrected function name
 out = cv2.VideoWriter("video.mp4", fourcc, 20, frame_size)
-
 
 while True:
     _, frame = cap.read()
@@ -24,14 +24,11 @@ while True:
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
     bodies = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-
     # Only start recording once a body or face detected
     if len(faces) + len(bodies) > 0:
-        recording = True
+        detection = True
 
     out.write(frame)
-
-
 
     # Drawing rectangles on the frame
     # for(x, y, width, height) in faces:
@@ -45,4 +42,3 @@ while True:
 out.release()
 cap.release()
 cv2.destoryAllWindows()
-
